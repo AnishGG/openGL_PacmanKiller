@@ -1,6 +1,7 @@
 #include "main.h"
 #include "timer.h"
 #include "ball.h"
+#include "rectangle.h"
 
 using namespace std;
 
@@ -13,6 +14,7 @@ GLFWwindow *window;
 **************************/
 
 Ball ball1, ball2, ball[100];
+Rectangle ground, grass, rec[100];
 int i = 0;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
@@ -54,25 +56,30 @@ void draw() {
     // Scene render
     ball1.draw(VP);
     ball2.draw(VP);
-    for(int k = 0;k < i; k++)
+    grass.draw(VP);
+    ground.draw(VP);
+//    rec.draw(VP);
+    for(int k = 0;k < i; k++){
         ball[k].draw(VP);
+        if(ball[k].isSlabAttached)
+            rec[k].draw(VP);
+    }
 }
 
 void tick_input(GLFWwindow *window) {
     int left  = glfwGetKey(window, GLFW_KEY_LEFT);
     int right = glfwGetKey(window, GLFW_KEY_RIGHT);
     int up = glfwGetKey(window, GLFW_KEY_UP);
-    if (left) {
-
-    }
-    if (right){
-
-    }
+    if (left) {}
+    if (right){}
 }
 
 void tick_elements() {
-    for(int k = 0;k < i; k++)
+    for(int k = 0;k < i; k++){
         ball[k].tick();
+        if(ball[k].isSlabAttached)
+            rec[k].tick();
+    }
 }
 
 /* Initialize the OpenGL rendering properties */
@@ -84,6 +91,25 @@ void initGL(GLFWwindow *window, int width, int height) {
 
     ball1       = Ball(2, -1, COLOR_RED, 0.2);
     ball2       = Ball(-2, 3, COLOR_GREEN, 0.2);
+//    Point *p = new Point[4];
+//    ball1.something(p);
+//    rec = Rectangle(p[0], p[1], p[2], p[3], COLOR_GREEN);
+//    cout << "chakkDe: " << points[0].x << endl;
+
+    /* Ground Coordinates */
+    Point p1, p2, p3, p4, p5, p6, p7, p8;
+    p1.x = -4.0; p1.y = -4.0;
+    p2.x = -4.0; p2.y = -2.5;
+    p3.x =  4.0; p3.y = -4.0;
+    p4.x =  4.0; p4.y = -2.5;
+    /* Green Coordinates */
+    p5 = p2;
+    p6 = p4;
+    p7.x = -4.0; p7.y = -2.0;
+    p8.x =  4.0; p8.y = -2.0;
+    /***********************************/
+    grass       =     Rectangle(p7, p8, p5, p6, COLOR_GREEN);
+    ground      =     Rectangle(p1, p2, p3, p4, COLOR_LIGHT_RED);
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
@@ -123,13 +149,12 @@ int main(int argc, char **argv) {
 
         if (t60.processTick()) {
             // 60 fps
-            // OpenGL Draw commands
             draw();
             // Swap Frame Buffer in double buffering
             glfwSwapBuffers(window);
 
             tick_elements();
-//            tick_input(window);
+            // tick_input(window);
         }
         if(t1.processTick()){
             double random_number = ((rand() % 5) - 1) + (double)rand() / (double)((unsigned)RAND_MAX + 1); // integer + decimal
@@ -137,10 +162,17 @@ int main(int argc, char **argv) {
             decimal_part += 0.01;
             color_t colors[] = {COLOR_BLACK, COLOR_GREEN, COLOR_RED, COLOR_WHITE};
             ball[i] = Ball(-5, random_number, colors[rand() % 4], (double)((rand() % 3) + 1) / 10);
-            ball[i++].speed = decimal_part;
+            ball[i].speed = decimal_part;
+            if(i % 4 == 0){
+                Point *p = new Point[4];
+                ball[i].attach_slab(p, 235, 0.5, 0.1);
+                rec[i] = Rectangle(p[0], p[1], p[2], p[3], COLOR_GREEN);
+                rec[i].set_speed(decimal_part);
+            }
+            i++;
         }
 
-//         Poll for Keyboard and mouse events
+        // Poll for Keyboard and mouse events
         glfwPollEvents();
     }
 

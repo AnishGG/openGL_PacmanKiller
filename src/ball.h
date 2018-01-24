@@ -8,8 +8,11 @@ class Ball {
 public:
     Ball() {}
     Ball(float x, float y, color_t color, double Radius);
+    void attach_slab(Point* points, float theta, float length, float thickness);
     glm::vec3 position;
     float rotation;
+    float Radius;
+    bool isSlabAttached;
     void draw(glm::mat4 VP);
     void set_position(float x, float y);
     void tick();

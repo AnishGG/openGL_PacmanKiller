@@ -13,6 +13,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+static const double PI = 3.14159265;
 
 struct color_t {
     int r;
@@ -82,5 +83,12 @@ extern const color_t COLOR_GREEN;
 extern const color_t COLOR_BLACK;
 extern const color_t COLOR_BACKGROUND;
 extern const color_t COLOR_WHITE;
+extern const color_t COLOR_LIGHT_RED;
+
+// ----- Points -----
+struct Point {
+    float x;
+    float y;
+};
 
 #endif
