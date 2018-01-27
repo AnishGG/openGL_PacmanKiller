@@ -14,13 +14,17 @@ GLFWwindow *window;
 **************************/
 
 Ball ball1, ball2, ball[100];
+vector<pair<Ball, Rectangle> > balls;
+vector<pair<Ball, Rectangle> >::iterator j;
+bool my_collision(Ball a, Ball b);
+
 Rectangle ground, grass, rec[100];
 int i = 0;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 
-Timer t60(1.0 / 60);
-Timer t1(1.0 / 1.0);
+Timer t60(1.0 / 120);
+Timer t1(1.0 / 3.0);
 
 /* Render the scene with openGL */
 /* Edit this function according to your assignment */
@@ -54,32 +58,68 @@ void draw() {
     glm::mat4 MVP;  // MVP = Projection * View * Model
 
     // Scene render
-    ball1.draw(VP);
     ball2.draw(VP);
     grass.draw(VP);
     ground.draw(VP);
-//    rec.draw(VP);
-    for(int k = 0;k < i; k++){
-        ball[k].draw(VP);
-        if(ball[k].isSlabAttached)
-            rec[k].draw(VP);
+    for(j = balls.begin(); j < balls.end(); j++){
+        j.base()->first.draw(VP);
+        if(j.base()->first.isSlabAttached)
+            j.base()->second.draw(VP);
     }
+    ball1.draw(VP);
 }
 
 void tick_input(GLFWwindow *window) {
     int left  = glfwGetKey(window, GLFW_KEY_LEFT);
     int right = glfwGetKey(window, GLFW_KEY_RIGHT);
-    int up = glfwGetKey(window, GLFW_KEY_UP);
-    if (left) {}
-    if (right){}
+    int up = glfwGetKey(window, GLFW_KEY_SPACE);
+    if(left && right)
+        ball1.speed_x = 0;
+    else if (left /*&& ball1.speed_x >= -0.04*/) {
+        ball1.speed_x = -0.08;
+    }
+    else if (right /*&& ball1.speed_x <= 0.04*/){
+        ball1.speed_x = +0.08;
+    }
+    else if(!ball1.jumped)
+        ball1.speed_x = 0;
+//    else
+//        ball1.speed_x = 0;
+    if(up){
+        ball1.jump();
+//        ball1.jump_theta(0, 1, 45);
+    }
 }
 
 void tick_elements() {
-    for(int k = 0;k < i; k++){
-        ball[k].tick();
-        if(ball[k].isSlabAttached)
-            rec[k].tick();
+    bool jumped_at_theta = 0;
+    ball1.tick();
+    bool isCollision = 0;
+    for(j = balls.begin(); j < balls.end(); j++){
+        j.base()->first.tick();
+        if(j.base()->first.isSlabAttached)
+            j.base()->second.tick();
+        /* Detect collision with the Player */
+        if(my_collision(ball1, j.base()->first)){
+            if(j.base()->first.isSlabAttached){
+                cout << "alpha: " << ball1.jump_theta(j.base()->second.theta) << "theta: " << j.base()->second.theta << endl;
+                jumped_at_theta = 1;
+            }
+            balls.erase(j);
+            isCollision = 1;
+            if(jumped_at_theta)
+                break;
+        }
+
     }
+    if(isCollision && !jumped_at_theta)
+        ball1.jump();
+    if(ball1.position.x > 3.8)
+        ball1.position.x = 3.8;
+    else if(ball1.position.x < -3.8)
+        ball1.position.x = -3.8;
+    if(ball1.position.y > 3.8)
+        ball1.position.y = 3.8;
 }
 
 /* Initialize the OpenGL rendering properties */
@@ -89,12 +129,8 @@ void initGL(GLFWwindow *window, int width, int height) {
     // Create the models
 
 
-    ball1       = Ball(2, -1, COLOR_RED, 0.2);
+    ball1       = Ball(2, -1.8, COLOR_PLAYER, 0.2);
     ball2       = Ball(-2, 3, COLOR_GREEN, 0.2);
-//    Point *p = new Point[4];
-//    ball1.something(p);
-//    rec = Rectangle(p[0], p[1], p[2], p[3], COLOR_GREEN);
-//    cout << "chakkDe: " << points[0].x << endl;
 
     /* Ground Coordinates */
     Point p1, p2, p3, p4, p5, p6, p7, p8;
@@ -154,21 +190,30 @@ int main(int argc, char **argv) {
             glfwSwapBuffers(window);
 
             tick_elements();
-            // tick_input(window);
+            tick_input(window);
         }
         if(t1.processTick()){
+            /* Section for Random balls */
             double random_number = ((rand() % 5) - 1) + (double)rand() / (double)((unsigned)RAND_MAX + 1); // integer + decimal
             double decimal_part = (double)((double)rand() / (double)((unsigned)RAND_MAX + 1)) / 33;
             decimal_part += 0.01;
+            double Radius = (double)((rand() % 3) + 1) / 10;
             color_t colors[] = {COLOR_BLACK, COLOR_GREEN, COLOR_RED, COLOR_WHITE};
-            ball[i] = Ball(-5, random_number, colors[rand() % 4], (double)((rand() % 3) + 1) / 10);
-            ball[i].speed = decimal_part;
+            Ball temp;
+            Rectangle temp1;
+            temp = Ball(-5, random_number, colors[rand() % 4], Radius);
+            temp.speed_x = decimal_part;
             if(i % 4 == 0){
+                float theta = 45 + 90;
                 Point *p = new Point[4];
-                ball[i].attach_slab(p, 235, 0.5, 0.1);
-                rec[i] = Rectangle(p[0], p[1], p[2], p[3], COLOR_GREEN);
-                rec[i].set_speed(decimal_part);
+                temp.attach_slab(p, theta, 2 * Radius, 0.05);
+                temp1 = Rectangle(p[0], p[1], p[2], p[3], COLOR_GREEN);
+                temp1.set_speed(decimal_part);
+                temp1.set_theta(theta);
             }
+            j = balls.begin();
+            balls.insert(j, make_pair(temp, temp1));
+            /***** Section ends here *****/
             i++;
         }
 
@@ -182,6 +227,27 @@ int main(int argc, char **argv) {
 bool detect_collision(bounding_box_t a, bounding_box_t b) {
     return (abs(a.x - b.x) * 2 < (a.width + b.width)) &&
            (abs(a.y - b.y) * 2 < (a.height + b.height));
+}
+
+/* Tells whether the player a collides with b according to the defined rules */
+bool my_collision(Ball a, Ball b){
+    double R_b, R_a, x_a, x_b, y_a, y_b, R, distance_bw_centers;
+    bool collided = 0;
+    x_a = a.position.x;
+    x_b = b.position.x;
+    y_a = a.position.y;
+    y_b = b.position.y;
+    R_b = b.Radius;
+    R_a = a.Radius;
+    distance_bw_centers = abs(sqrt((x_a - x_b)*(x_a - x_b) + (y_a - y_b)*(y_a - y_b)));
+    if(distance_bw_centers <= R_b){
+        collided = 1;
+    }
+    if((distance_bw_centers <= R_b + R_a) && (y_a >= y_b) /*&& (x_a <= x_b + R_b) && (x_a >= x_b - R_b)*/)
+        collided = 1;
+    if(a.speed_y > 0.0)
+        collided = 0;
+    return collided;
 }
 
 void reset_screen() {

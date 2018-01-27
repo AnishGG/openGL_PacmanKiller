@@ -84,6 +84,7 @@ extern const color_t COLOR_BLACK;
 extern const color_t COLOR_BACKGROUND;
 extern const color_t COLOR_WHITE;
 extern const color_t COLOR_LIGHT_RED;
+extern const color_t COLOR_PLAYER;
 
 // ----- Points -----
 struct Point {

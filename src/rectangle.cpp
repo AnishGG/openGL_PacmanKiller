@@ -5,6 +5,7 @@
 Rectangle::Rectangle(Point po1, Point p2, Point p3, Point p4, color_t color) {
     this->position = glm::vec3(0, 0, 0);
     this->rotation = 0;
+    this->theta = 0;
 
     GLfloat vertex_buffer_data[] = {
         po1.x, po1.y, 0,
@@ -40,4 +41,8 @@ void Rectangle::tick() {
 
 void Rectangle::set_speed(float speed){
     this->speed = speed;
+}
+
+void Rectangle::set_theta(float theta){
+    this->theta = theta;
 }

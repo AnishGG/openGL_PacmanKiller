@@ -6,8 +6,7 @@ Ball::Ball(float x, float y, color_t color, double Radius) {
     this->rotation = 0;
     this->Radius   = Radius;
     this->isSlabAttached = 0;
-    speed = 0.01;
-
+    this->speed_x = 0.01;
 
     GLfloat vertex_buffer_data[10010];
     double theta = 1.0;
@@ -46,22 +45,48 @@ void Ball::set_position(float x, float y) {
 }
 
 void Ball::tick() {
-    this->position.x += this->speed;
+    this->position.x += this->speed_x;
+    this->position.y += this->speed_y;
+    if(this->position.y <= -1.8){
+        jumped = 0;
+        speed_y = 0, speed_x = 0;
+        this->position.y = -1.8;
+    }
+    this->deaccelerate();
 }
 
 void Ball::jump() {
-    speed = 0.3;
+//    speed_x = 0.0;
+    speed_y = 0.20;
+    jumped = 1;
+}
+
+float Ball::jump_theta(float theta){
+    float v_y = this->speed_y;
+    float v_x = this->speed_x;
+    float alpha = atan(v_y / v_x) * 180.0 / PI;
+    if(alpha < 0)
+        alpha += 180.0;
+    float speed_net = 0.15;
+    float net_angle = 2 * theta - alpha;
+    speed_x = speed_net * cos(net_angle * PI / 180.0);
+    speed_y = speed_net * sin(net_angle * PI / 180.0);
+    jumped = 1;
+    return alpha;
 }
 
 void Ball::deaccelerate() {
-    speed -= 0.01;
+    if(jumped && speed_y > -0.15){
+        speed_y -= 0.01;
+    }
+    if(jumped){
+        if(speed_x > 0.0001)
+            speed_x -= 0.005;
+        else if(speed_x < 0.0001)
+            speed_x += 0.005;
+    }
 }
 
-bounding_box_t Ball::bounding_box() {
-    float x = this->position.x, y = this->position.y;
-    bounding_box_t bbox = { x, y, 0.4, 0.4 };
-    return bbox;
-}
 
 void Ball::attach_slab(Point* points, float theta, float length, float thickness){
     float new_x1 = this->position.x + (this->Radius + thickness) * cos(theta * PI / 180.0);
@@ -85,3 +110,25 @@ void Ball::attach_slab(Point* points, float theta, float length, float thickness
     points[0] = p1;points[1] = p2;points[2] = p3;points[3] = p4;
     this->isSlabAttached = 1;
 }
+
+/* a is my this-> ball */
+//bool Ball::my_collision(Ball b){
+//    double R_b, R_a, x_a, x_b, y_a, y_b, R, distance_bw_centers;
+//    bool collided = 0;
+//    x_a = this->position.x;
+//    x_b = b.position.x;
+//    y_a = this->position.y;
+//    y_b = b.position.y;
+//    R_b = b.Radius;
+//    R_a = this->Radius;
+//    distance_bw_centers = abs(sqrt((x_a - x_b)*(x_a - x_b) + (y_a - y_b)*(y_a - y_b)));
+//    if(distance_bw_centers <= R_b)
+//    {
+//        collided = 1;
+//    }
+//    if((distance_bw_centers <= R_b + R_a) && (y_a >= y_b) /*&& (x_a <= x_b + R_b) && (x_a >= x_b - R_b)*/)
+//        collided = 1;
+//    if((this->speed_y) > 0.0)
+//        collided = 0;
+//    return collided;
+//}

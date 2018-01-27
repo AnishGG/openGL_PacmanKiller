@@ -11,10 +11,12 @@ public:
     glm::vec3 position;
     float rotation;
     float speed;
+    float theta;
     void draw(glm::mat4 VP);
     void set_position(float x, float y);
     void set_speed(float speed);
     void tick();
+    void set_theta(float theta);
     bounding_box_t bounding_box();
 private:
     VAO *object;
