@@ -19,8 +19,8 @@ vector<pair<Ball, Rectangle> > balls;
 vector<pair<Ball, Rectangle> >::iterator j;
 bool my_collision(Ball a, Ball b);
 
-Rectangle ground, grass, rec[100];
-Ellipse pond, pond_frame;
+Rectangle ground, grass, rec[100], tramp_one, tramp_two;
+Ellipse pond, pond_frame, trampoline;
 int i = 0;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
@@ -70,6 +70,9 @@ void draw() {
         if(j.base()->first.isSlabAttached)
             j.base()->second.draw(VP);
     }
+    tramp_one.draw(VP);
+    tramp_two.draw(VP);
+    trampoline.draw(VP);
     ball1.draw(VP);
 }
 
@@ -79,16 +82,14 @@ void tick_input(GLFWwindow *window) {
     int up = glfwGetKey(window, GLFW_KEY_SPACE);
     if(left && right)
         ball1.speed_x = 0;
-    else if (left /*&& ball1.speed_x >= -0.04*/) {
+    else if (left) {
         ball1.speed_x = -0.08;
     }
-    else if (right /*&& ball1.speed_x <= 0.04*/){
+    else if (right){
         ball1.speed_x = +0.08;
     }
     else if(!ball1.jumped || ball1.drowned)
         ball1.speed_x = 0;
-//    else
-//        ball1.speed_x = 0;
     if(up && !ball1.jumped){
         ball1.jump();
     }
@@ -128,8 +129,13 @@ void tick_elements() {
         ball1.speed_y = -0.01;  // To remove the sticking of the ball on the top of the screen
     }
     /**************************************/
-    cout << "drowned: " << ball1.drowned << endl;
-    cout << "pool.x0: " << pond.x0 << " ball1.x: " << ball1.position.x << endl;
+
+    /* Check if the ball lands on the trampoline */
+    if(ball1.position.x > trampoline.x_min && ball1.position.x < trampoline.x_max){
+        if(ball1.position.y - ball1.Radius <= trampoline.y0 && ball1.speed_y < 0){
+            ball1.speed_y = 0.30;
+        }
+    }
 }
 
 /* Initialize the OpenGL rendering properties */
@@ -158,6 +164,25 @@ void initGL(GLFWwindow *window, int width, int height) {
     ground      =     Rectangle(p1, p2, p3, p4, COLOR_LIGHT_RED);
     pond        =     Ellipse(0, -2.0, COLOR_WATER, 1.0, 0.7);
     pond_frame  =     Ellipse(0, -2.0, COLOR_WATER, 1.2, 0.9);
+
+    /* The making of the Trampoline */
+    /* Using p1, p2, p3, p4 again for trampoline co-ordinates */
+    p1.x =  2.1; p1.y = -2.0;
+    p2.x =  2.2; p2.y = -2.0;
+    p3.x =  2.1; p3.y = -1.5;
+    p4.x =  2.2; p4.y = -1.5;
+    tramp_one   =     Rectangle(p1, p2, p3, p4, COLOR_RED);
+
+    /* Using those co-ordinates again */
+    p1.x =  2.9; p1.y = -2.0;
+    p2.x =  3.0; p2.y = -2.0;
+    p3.x =  2.9; p3.y = -1.5;
+    p4.x =  3.0; p4.y = -1.5;
+    tramp_two   =     Rectangle(p1, p2, p3, p4, COLOR_RED);
+
+    trampoline = Ellipse(2.55, -1.5, COLOR_RED, 0.7 / 2, 0.2);
+
+    /********************************/
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
@@ -216,7 +241,7 @@ int main(int argc, char **argv) {
             temp = Ball(-5, random_number, colors[rand() % 4], Radius);
             temp.speed_x = decimal_part;
             if(i % 4 == 0){
-                float theta = 45 + 15;
+                float theta = 45 ;
                 Point *p = new Point[4];
                 temp.attach_slab(p, theta, 2 * Radius, 0.05);
                 temp1 = Rectangle(p[0], p[1], p[2], p[3], COLOR_GREEN);
@@ -236,10 +261,6 @@ int main(int argc, char **argv) {
     quit(window);
 }
 
-bool detect_collision(bounding_box_t a, bounding_box_t b) {
-    return (abs(a.x - b.x) * 2 < (a.width + b.width)) &&
-           (abs(a.y - b.y) * 2 < (a.height + b.height));
-}
 
 /* Tells whether the player a collides with b according to the defined rules */
 bool my_collision(Ball a, Ball b){
@@ -251,7 +272,7 @@ bool my_collision(Ball a, Ball b){
     y_b = b.position.y;
     R_b = b.Radius;
     R_a = a.Radius;
-    distance_bw_centers = abs(sqrt((x_a - x_b)*(x_a - x_b) + (y_a - y_b)*(y_a - y_b)));
+    distance_bw_centers = fabs(sqrt((x_a - x_b)*(x_a - x_b) + (y_a - y_b)*(y_a - y_b)));
     if(distance_bw_centers <= R_b){
         collided = 1;
     }

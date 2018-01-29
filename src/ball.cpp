@@ -11,7 +11,7 @@ Ball::Ball(float x, float y, color_t color, double Radius) {
     this->jumped = 0;
     this->drowned = 0;
 
-    GLfloat vertex_buffer_data[10010];
+    static GLfloat vertex_buffer_data[10010];
     double theta = 1.0;
     int i = 0;
     while(theta < 362.0){
@@ -92,7 +92,7 @@ void Ball::deaccelerate() {
     if(jumped){
         if(speed_x > 0.0001)
             speed_x -= 0.005;
-        else if(speed_x < 0.0001)
+        else if(speed_x < -0.0001)
             speed_x += 0.005;
     }
     if(drowned && speed_y > -0.15){
@@ -106,8 +106,10 @@ void Ball::deaccelerate() {
 }
 
 void Ball::jump() {
-//    speed_x = 0.0;
-    speed_y = 0.20;
+    if(!drowned)
+        speed_y = 0.20;
+    else
+        speed_y = 0.10;
     jumped = 1;
 }
 
