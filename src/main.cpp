@@ -2,6 +2,7 @@
 #include "timer.h"
 #include "ball.h"
 #include "rectangle.h"
+#include "ellipse.h"
 
 using namespace std;
 
@@ -19,6 +20,7 @@ vector<pair<Ball, Rectangle> >::iterator j;
 bool my_collision(Ball a, Ball b);
 
 Rectangle ground, grass, rec[100];
+Ellipse pond, pond_frame;
 int i = 0;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
@@ -61,6 +63,8 @@ void draw() {
     ball2.draw(VP);
     grass.draw(VP);
     ground.draw(VP);
+    pond_frame.draw(VP);
+    pond.draw(VP);
     for(j = balls.begin(); j < balls.end(); j++){
         j.base()->first.draw(VP);
         if(j.base()->first.isSlabAttached)
@@ -81,24 +85,23 @@ void tick_input(GLFWwindow *window) {
     else if (right /*&& ball1.speed_x <= 0.04*/){
         ball1.speed_x = +0.08;
     }
-    else if(!ball1.jumped)
+    else if(!ball1.jumped || ball1.drowned)
         ball1.speed_x = 0;
 //    else
 //        ball1.speed_x = 0;
-    if(up){
+    if(up && !ball1.jumped){
         ball1.jump();
-//        ball1.jump_theta(0, 1, 45);
     }
 }
 
 void tick_elements() {
     bool jumped_at_theta = 0;
-    ball1.tick();
+    ball1.tick(pond);
     bool isCollision = 0;
     for(j = balls.begin(); j < balls.end(); j++){
-        j.base()->first.tick();
+        j.base()->first.tick(pond); // first is the ball
         if(j.base()->first.isSlabAttached)
-            j.base()->second.tick();
+            j.base()->second.tick();    // second is the slab attached
         /* Detect collision with the Player */
         if(my_collision(ball1, j.base()->first)){
             if(j.base()->first.isSlabAttached){
@@ -110,16 +113,23 @@ void tick_elements() {
             if(jumped_at_theta)
                 break;
         }
+        /************************************/
 
     }
     if(isCollision && !jumped_at_theta)
         ball1.jump();
+    /* To bind the ball inside the screen */
     if(ball1.position.x > 3.8)
         ball1.position.x = 3.8;
     else if(ball1.position.x < -3.8)
         ball1.position.x = -3.8;
-    if(ball1.position.y > 3.8)
+    if(ball1.position.y > 3.8){
         ball1.position.y = 3.8;
+        ball1.speed_y = -0.01;  // To remove the sticking of the ball on the top of the screen
+    }
+    /**************************************/
+    cout << "drowned: " << ball1.drowned << endl;
+    cout << "pool.x0: " << pond.x0 << " ball1.x: " << ball1.position.x << endl;
 }
 
 /* Initialize the OpenGL rendering properties */
@@ -146,6 +156,8 @@ void initGL(GLFWwindow *window, int width, int height) {
     /***********************************/
     grass       =     Rectangle(p7, p8, p5, p6, COLOR_GREEN);
     ground      =     Rectangle(p1, p2, p3, p4, COLOR_LIGHT_RED);
+    pond        =     Ellipse(0, -2.0, COLOR_WATER, 1.0, 0.7);
+    pond_frame  =     Ellipse(0, -2.0, COLOR_WATER, 1.2, 0.9);
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
@@ -204,7 +216,7 @@ int main(int argc, char **argv) {
             temp = Ball(-5, random_number, colors[rand() % 4], Radius);
             temp.speed_x = decimal_part;
             if(i % 4 == 0){
-                float theta = 45 + 90;
+                float theta = 45 + 15;
                 Point *p = new Point[4];
                 temp.attach_slab(p, theta, 2 * Radius, 0.05);
                 temp1 = Rectangle(p[0], p[1], p[2], p[3], COLOR_GREEN);

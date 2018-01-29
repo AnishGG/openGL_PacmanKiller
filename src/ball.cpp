@@ -1,4 +1,5 @@
 #include "ball.h"
+#include "ellipse.h"
 #include "main.h"
 
 Ball::Ball(float x, float y, color_t color, double Radius) {
@@ -7,6 +8,8 @@ Ball::Ball(float x, float y, color_t color, double Radius) {
     this->Radius   = Radius;
     this->isSlabAttached = 0;
     this->speed_x = 0.01;
+    this->jumped = 0;
+    this->drowned = 0;
 
     GLfloat vertex_buffer_data[10010];
     double theta = 1.0;
@@ -44,35 +47,42 @@ void Ball::set_position(float x, float y) {
     this->position = glm::vec3(x, y, 0);
 }
 
-void Ball::tick() {
+void Ball::tick(Ellipse pool) {
     this->position.x += this->speed_x;
     this->position.y += this->speed_y;
-    if(this->position.y <= -1.8){
+
+    /* Setting the ground limit for the ball */
+    if(this->position.y <= -1.8 && !drowned){
         jumped = 0;
         speed_y = 0, speed_x = 0;
         this->position.y = -1.8;
     }
+
+    /* Setting the pool limits */
+    if(this->position.x >= pool.x_min && this->position.x <= pool.x_max && this->position.y <= -1.6){
+        if(this->position.y <= -1.79999){
+            jumped = 0;
+            drowned = 1;
+        }
+        else{
+            jumped = 1;drowned = 0;
+        }
+    }
+    else if(this->position.x < pool.x_min || this->position.x > pool.x_max){
+        drowned = 0;
+    }
+
+    if((this->position.y <= pool.calculate_y(this->position.x)) && drowned){
+        speed_y = 0;
+        this->position.y = pool.calculate_y(this->position.x);
+
+        // To move the ball to the bottom most point
+        if(pool.x0 > this->position.x)
+            this->position.x += 0.01, speed_y -= 0.01;
+        else if(pool.x0 < this->position.x)
+            this->position.x -= 0.01, speed_y -= 0.01;
+    }
     this->deaccelerate();
-}
-
-void Ball::jump() {
-//    speed_x = 0.0;
-    speed_y = 0.20;
-    jumped = 1;
-}
-
-float Ball::jump_theta(float theta){
-    float v_y = this->speed_y;
-    float v_x = this->speed_x;
-    float alpha = atan(v_y / v_x) * 180.0 / PI;
-    if(alpha < 0)
-        alpha += 180.0;
-    float speed_net = 0.15;
-    float net_angle = 2 * theta - alpha;
-    speed_x = speed_net * cos(net_angle * PI / 180.0);
-    speed_y = speed_net * sin(net_angle * PI / 180.0);
-    jumped = 1;
-    return alpha;
 }
 
 void Ball::deaccelerate() {
@@ -85,6 +95,34 @@ void Ball::deaccelerate() {
         else if(speed_x < 0.0001)
             speed_x += 0.005;
     }
+    if(drowned && speed_y > -0.15){
+        speed_y -= 0.001;
+//        speed_y -= (speed_y*speed_y + speed_x*speed_x)*0.4;
+    }
+    if(drowned && speed_y < -0.15){
+        speed_y += 0.001;
+//        speed_y += (speed_y*speed_y + speed_x*speed_x)*5;
+    }
+}
+
+void Ball::jump() {
+//    speed_x = 0.0;
+    speed_y = 0.20;
+    jumped = 1;
+}
+
+float Ball::jump_theta(float theta){
+    float v_y = this->speed_y;
+    float v_x = this->speed_x;
+    float alpha = atan(v_y / v_x) * 180.0 / PI;
+    if(alpha < -0.001)      // -0.001 is taken as at an angle of 0.00 it was getting converted to 180.0 (float prob)
+        alpha += 180.0;
+    float speed_net = 0.20;
+    float net_angle = 2 * theta - alpha;
+    speed_x = speed_net * cos(net_angle * PI / 180.0);
+    speed_y = speed_net * sin(net_angle * PI / 180.0);
+    jumped = 1;
+    return alpha;
 }
 
 

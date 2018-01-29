@@ -1,4 +1,5 @@
 #include "main.h"
+#include "ellipse.h"
 
 #ifndef BALL_H
 #define BALL_H
@@ -13,10 +14,10 @@ public:
     glm::vec3 position;
     float rotation;
     float Radius;
-    bool isSlabAttached, jumped;
+    bool isSlabAttached, jumped, drowned;
     void draw(glm::mat4 VP);
     void set_position(float x, float y);
-    void tick();
+    void tick(Ellipse pool);
     void jump();
     float jump_theta(float theta_slab);
     void deaccelerate();
