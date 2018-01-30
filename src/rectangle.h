@@ -1,6 +1,6 @@
 #include "main.h"
 
-#ifndef RECTANLE_H
+#ifndef RECTANGLE_H
 #define RECTANGLE_H
 
 

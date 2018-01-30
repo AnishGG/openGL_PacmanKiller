@@ -18,7 +18,7 @@ public:
     void draw(glm::mat4 VP);
     void set_position(float x, float y);
     double calculate_y(float x);
-    private:
+private:
     VAO *object;
 };
 

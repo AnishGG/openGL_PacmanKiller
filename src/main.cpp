@@ -19,7 +19,7 @@ vector<pair <Ball, Rectangle> >::iterator j;
 
 Rectangle ground, grass, tramp_one, tramp_two;
 Ellipse pond, pond_frame, trampoline;
-Magnet lol, lol2;
+Magnet mag1, mag2;
 int count_enemies = 0;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
@@ -59,8 +59,8 @@ void draw() {
     glm::mat4 MVP;  // MVP = Projection * View * Model
 
     // Scene render
-    lol.draw(VP);
-    lol2.draw(VP);
+    mag1.draw(VP);
+    mag2.draw(VP);
     grass.draw(VP);
     ground.draw(VP);
     pond_frame.draw(VP);
@@ -86,7 +86,7 @@ void tick_input(GLFWwindow *window) {
         Player.speed_x = -BALL_SPEED;
     }
     else if (right){
-        Player.speed_x = BALL_SPEED;
+        Player.speed_x = +BALL_SPEED;
     }
     else if(!Player.jumped || Player.drowned)
         Player.speed_x = 0;
@@ -140,10 +140,10 @@ void tick_elements() {
         }
     }
 
-    /* Check if the ball is in the magnetic region */
-    if(lol.detect(Player)){
-        Player.speed_x -= 0.01;
-    }
+    /* Check if the ball is in the magnetic region and reduce it's speed*/
+    mag1.detect_in_range(&Player);
+    mag2.detect_in_range(&Player);
+
 }
 
 /* Initialize the OpenGL rendering properties */
@@ -193,8 +193,9 @@ void initGL(GLFWwindow *window, int width, int height) {
     /********************************/
 
     /* Creating magnets */
-    lol  = Magnet(0, 0, 0.8, 0.7, 0, COLOR_RED);
-    lol2 = Magnet(0, 0, 0.6, 0.5, 0, COLOR_BACKGROUND);
+    // Boiler(x_center, y_center, length, breadth, theta, thickness, color)
+    mag1 = Magnet(-2, 3, 0.8, 0.7, 0, 0.2, COLOR_RED);
+    mag2 = Magnet( 2, 3, 0.8, 0.7, 180, 0.2, COLOR_RED);
     /*****************************************************************/
 
     // Create and compile our GLSL program from the shaders

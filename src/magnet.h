@@ -1,24 +1,19 @@
 #include "main.h"
 #include "ball.h"
+#include "magnet_boiler.h"
 
 #ifndef MAGNET_H
 #define MAGNET_H
 
-
 class Magnet {
 public:
     Magnet() {}
-    Magnet(float x, float y, double length, double breadth, double angle, color_t color);
-    glm::vec3 position;
-    float rotation;
-    float major, minor, angle;
-    float x0, y0;
+    Magnet(float x, float y, double length, double breadth, double angle, double thickness, color_t color);
     void draw(glm::mat4 VP);
-    void set_position(float x, float y);
-    bool detect(Ball Player);
+    void detect_in_range(Ball *Player);
 private:
-    VAO *object;
-    const static double MAGNET_RANGE = 2.0;
+    static const double MAGNET_DEACCELARATION = 0.02;
+    Magnet_boiler outer, inner;
 };
 
-#endif // MAGNET_H
+#endif // BOILER_H

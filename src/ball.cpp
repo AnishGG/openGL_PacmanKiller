@@ -14,7 +14,7 @@ Ball::Ball(float x, float y, color_t color, double Radius) {
     static GLfloat vertex_buffer_data[10010];
     double theta = 1.0;
     int i = 0;
-    while(theta < 362.0){
+    while(theta < 361.0){
         vertex_buffer_data[i] = Radius * cos((theta * PI) / 180.0);
         vertex_buffer_data[i+1] = Radius * sin((theta * PI) / 180.0);
         vertex_buffer_data[i+2] = 0.0;
