@@ -63,6 +63,7 @@ void Ball::tick(Ellipse pool) {
         if(this->position.y <= -1.79999){
             jumped = 0;
             drowned = 1;
+            speed_y = -0.015;   // For the ball to slow down once it enters the pond
         }
         else{
             jumped = 1;drowned = 0;

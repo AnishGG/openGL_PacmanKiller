@@ -12,7 +12,7 @@ Ellipse::Ellipse(float x, float y, color_t color, double major, double minor) {
     this->b = minor;
     GLfloat vertex_buffer_data[10010];
     int i = 0;
-    while(theta < 361.0){
+    while(theta < 360.0){
 
         vertex_buffer_data[i] = major * cos((theta * PI) / 180.0);
         vertex_buffer_data[i+1] = minor * sin((theta * PI) / 180.0);
