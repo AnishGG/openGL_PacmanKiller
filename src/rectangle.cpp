@@ -2,13 +2,14 @@
 #include "main.h"
 
 /* Diagnol Points need to be p2 and p3 */
-Rectangle::Rectangle(Point po1, Point p2, Point p3, Point p4, color_t color) {
+Rectangle::Rectangle(Point p1, Point p2, Point p3, Point p4, color_t color) {
     this->position = glm::vec3(0, 0, 0);
     this->rotation = 0;
     this->theta = 0;
+    this->max_point = std::max(p2.y, p3.y);
 
     GLfloat vertex_buffer_data[] = {
-        po1.x, po1.y, 0,
+        p1.x, p1.y, 0,
         p2.x, p2.y, 0,
         p3.x, p3.y, 0,
 

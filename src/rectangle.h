@@ -12,6 +12,7 @@ public:
     float rotation;
     float speed;
     float theta;
+    float max_point;
     void draw(glm::mat4 VP);
     void set_position(float x, float y);
     void set_speed(float speed);

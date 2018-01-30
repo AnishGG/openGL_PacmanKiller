@@ -5,6 +5,7 @@
 #include <cmath>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -14,6 +15,7 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 static const double PI = 3.14159265;
+
 
 struct color_t {
     int r;
@@ -93,4 +95,11 @@ struct Point {
     float y;
 };
 
+// ------ main.cpp ---------
+void generate_enemies();
+static const float BALL_SPEED = 0.08;
+static const float SCREEN_X_MAX = 3.8;
+static const float SCREEN_X_MIN = -3.8;
+static const float SCREEN_Y_MAX = 3.8;
+static const float TRAMPOLINE_PUSH = 0.30;
 #endif
