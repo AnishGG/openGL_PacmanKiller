@@ -96,6 +96,7 @@ void tick_input(GLFWwindow *window) {
     if(up && !Player.jumped){
         Player.jump();
     }
+
     /* Checking the panning */
     if(pan_left && pan_right)
         ; // Do nothing
@@ -154,6 +155,23 @@ void tick_elements() {
     /* Check if the ball is in the magnetic region and reduce it's speed*/
     mag1.detect_in_range(&Player);
     mag2.detect_in_range(&Player);
+
+    /********************** Automatic Panning Section *********************/
+    if(Player.position.x > (screen_center_x + 3.6 / screen_zoom)){
+        screen_center_x += 0.1;
+    }
+    else if(Player.position.x < (screen_center_x - 3.6 / screen_zoom)){
+        screen_center_x -= 0.1;
+    }
+    if(Player.position.y > (screen_center_y + 3.6 / screen_zoom)){
+        screen_center_y += 0.1;
+    }
+    else if(Player.position.y < (screen_center_y - 2.6 / screen_zoom)){
+        screen_center_y -= 0.1;
+    }
+    reset_screen();
+    /********************** Section Ends here *******************************/
+
 
 }
 
@@ -255,6 +273,7 @@ int main(int argc, char **argv) {
         }
         if(t1.processTick()){
             generate_enemies();
+            destroy_enemies();
         }
 
         // Poll for Keyboard and mouse events
@@ -273,7 +292,7 @@ void generate_enemies(){
     color_t colors[] = {COLOR_BLACK, COLOR_GREEN, COLOR_RED, COLOR_WHITE};
     Ball temp;
     Rectangle temp1;
-    temp = Ball(-5, random_number, colors[rand() % 4], Radius);
+    temp = Ball(-7, random_number, colors[rand() % 4], Radius);
     temp.speed_x = decimal_part;
     if(count_enemies % 4 == 0){
         float theta = 45 ;
@@ -287,6 +306,13 @@ void generate_enemies(){
     balls.insert(j, make_pair(temp, temp1));
     /***** Section ends here *****/
     count_enemies++;
+}
+
+void destroy_enemies(){
+    for(j = balls.begin(); j < balls.end(); j++){
+        if(j.base()->first.position.x > 2*SCREEN_X_MAX)
+            balls.erase(j);
+    }
 }
 
 void reset_screen() {
