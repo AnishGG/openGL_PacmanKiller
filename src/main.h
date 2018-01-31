@@ -98,8 +98,8 @@ struct Point {
 // ------ main.cpp ---------
 void generate_enemies();
 static const float BALL_SPEED = 0.08;
-static const float SCREEN_X_MAX = 3.8;
-static const float SCREEN_X_MIN = -3.8;
-static const float SCREEN_Y_MAX = 3.8;
-static const float TRAMPOLINE_PUSH = 0.30;
+static const float SCREEN_X_MAX = 3.8 * 4 / 3 + 0.15;
+static const float SCREEN_X_MIN = -3.8 * 4 / 3 - 0.15;
+static const float SCREEN_Y_MAX = 3.8 * 4 / 3 + 0.15;
+static const float TRAMPOLINE_PUSH = 0.31;
 #endif

@@ -77,8 +77,10 @@ void draw() {
 }
 
 void tick_input(GLFWwindow *window) {
-    int left  = glfwGetKey(window, GLFW_KEY_LEFT);
-    int right = glfwGetKey(window, GLFW_KEY_RIGHT);
+    int left  = glfwGetKey(window, GLFW_KEY_A);
+    int right = glfwGetKey(window, GLFW_KEY_D);
+    int pan_left = glfwGetKey(window, GLFW_KEY_LEFT);
+    int pan_right = glfwGetKey(window, GLFW_KEY_RIGHT);
     int up = glfwGetKey(window, GLFW_KEY_SPACE);
     if(left && right)
         Player.speed_x = 0;
@@ -94,6 +96,15 @@ void tick_input(GLFWwindow *window) {
     if(up && !Player.jumped){
         Player.jump();
     }
+    /* Checking the panning */
+    if(pan_left && pan_right)
+        ; // Do nothing
+    else if(pan_left && screen_center_x > (-3.8 * screen_zoom))
+        screen_center_x -= 0.1;
+    else if(pan_right && screen_center_x < (3.8 * screen_zoom))
+        screen_center_x += 0.1;
+    reset_screen();
+    /***********************/
 }
 
 void tick_elements() {
@@ -159,15 +170,15 @@ void initGL(GLFWwindow *window, int width, int height) {
 
     /* Ground Coordinates */
     Point p1, p2, p3, p4, p5, p6, p7, p8;
-    p1.x = -4.0; p1.y = -4.0;
-    p2.x = -4.0; p2.y = -2.5;
-    p3.x =  4.0; p3.y = -4.0;
-    p4.x =  4.0; p4.y = -2.5;
+    p1.x = -16.0; p1.y = -8.0;
+    p2.x = -16.0; p2.y = -2.5;
+    p3.x =  16.0; p3.y = -8.0;
+    p4.x =  16.0; p4.y = -2.5;
     /* Green Coordinates */
     p5 = p2;
     p6 = p4;
-    p7.x = -4.0; p7.y = -2.0;
-    p8.x =  4.0; p8.y = -2.0;
+    p7.x = -16.0; p7.y = -2.0;
+    p8.x =  16.0; p8.y = -2.0;
     /***********************************/
     grass       =     Rectangle(p7, p8, p5, p6, COLOR_GREEN);
     ground      =     Rectangle(p1, p2, p3, p4, COLOR_LIGHT_RED);
@@ -255,7 +266,7 @@ int main(int argc, char **argv) {
 
 void generate_enemies(){
     /* Section for Random balls */
-    double random_number = ((rand() % 5) - 1) + (double)rand() / (double)((unsigned)RAND_MAX + 1); // integer + decimal
+    double random_number = ((rand() % 4) - 1) + (double)rand() / (double)((unsigned)RAND_MAX + 1); // integer + decimal
     double decimal_part = (double)((double)rand() / (double)((unsigned)RAND_MAX + 1)) / 33;
     decimal_part += 0.01;
     double Radius = (double)((rand() % 3) + 1) / 10;
