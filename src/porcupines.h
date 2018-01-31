@@ -19,6 +19,7 @@ public:
     void set_speed(float speed);
     void tick();
     bool detect_collision(Ball Player, Score *score);
+    void set_validity(bool valid);
 private:
     VAO *object;
     bool is_valid;

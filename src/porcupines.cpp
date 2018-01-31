@@ -74,3 +74,7 @@ bool Porcupine::detect_collision(Ball Player, Score *score){
     }
     return 0;
 }
+
+void Porcupine::set_validity(bool valid){
+    is_valid = valid;
+}

@@ -4,6 +4,9 @@
 #include "magnet.h"
 #include "porcupines.h"
 #include "score.h"
+#include "digit.h"
+#include "level.h"
+#include "display.h"
 
 using namespace std;
 
@@ -24,12 +27,16 @@ Ellipse pond, pond_frame, trampoline;
 Magnet mag1, mag2;
 Porcupine porpine[10];
 Score score;
+Digit digit[10];
+Level level;
+Display display;
 int count_enemies = 0;
 
-float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
+float screen_zoom = 0.9, screen_center_x = 0, screen_center_y = 0;
 
 Timer t60(1.0 / 60);
 Timer t1(1.0 / 1.0);
+int game_timer = 40;
 
 /* Render the scene with openGL */
 /* Edit this function according to your assignment */
@@ -80,12 +87,14 @@ void draw() {
     tramp_two.draw(VP);
     trampoline.draw(VP);
     Player.draw(VP);
+    char test[10];
+    sprintf(test, "%d", game_timer);
+    display.store(test, 3.6, 3.8);
+    display.draw(VP);
 }
 
 void tick_input(GLFWwindow *window) {
-    char test[10101];
-    sprintf(test, "Score: %d", score.get_score());
-    glfwSetWindowTitle(window, test);
+    glfwSetWindowTitle(window, level.get_string(score));
     int left  = glfwGetKey(window, GLFW_KEY_A);
     int right = glfwGetKey(window, GLFW_KEY_D);
     int pan_left = glfwGetKey(window, GLFW_KEY_LEFT);
@@ -115,6 +124,16 @@ void tick_input(GLFWwindow *window) {
         screen_center_x += 0.1;
     reset_screen();
     /***********************/
+
+    if(level.get_level() > 3){   cout << "You win the game" << endl; quit(window);}
+    if(game_timer <= 0)
+        quit(window);
+    if(level.get_level_up_score() <= score.get_score()){
+        balls.clear();                //destroy_all_enemies()
+        level.level_up();
+        score.subtract(score.get_score());
+        game_timer = 40;
+    }
 }
 
 void tick_elements() {
@@ -174,27 +193,26 @@ void tick_elements() {
     /* For ticking the porcupines */
     for(int ii = 0;ii < 4; ii++){
         porpine[ii].tick();
-        cout << porpine[ii].detect_collision(Player, &score) << endl;
+        porpine[ii].detect_collision(Player, &score);
+        if(level.get_level() < 3)   porpine[ii].set_validity(0);
     }
     /*****************************/
 
     /********************** Automatic Panning Section *********************/
-//    if(Player.position.x > (screen_center_x + 3.6 / screen_zoom)){
-//        screen_center_x += 0.1;
-//    }
-//    else if(Player.position.x < (screen_center_x - 3.6 / screen_zoom)){
-//        screen_center_x -= 0.1;
-//    }
-//    if(Player.position.y > (screen_center_y + 3.6 / screen_zoom)){
-//        screen_center_y += 0.1;
-//    }
-//    else if(Player.position.y < (screen_center_y - 2.6 / screen_zoom)){
-//        screen_center_y -= 0.1;
-//    }
-//    reset_screen();
+    if(Player.position.x > (screen_center_x + 3.6 / screen_zoom)){
+        screen_center_x += 0.1;
+    }
+    else if(Player.position.x < (screen_center_x - 3.6 / screen_zoom)){
+        screen_center_x -= 0.1;
+    }
+    if(Player.position.y > (screen_center_y + 3.6 / screen_zoom)){
+        screen_center_y += 0.1;
+    }
+    else if(Player.position.y < (screen_center_y - 2.6 / screen_zoom)){
+        screen_center_y -= 0.1;
+    }
+    reset_screen();
     /********************** Section Ends here *******************************/
-
-
 }
 
 /* Initialize the OpenGL rendering properties */
@@ -252,11 +270,15 @@ void initGL(GLFWwindow *window, int width, int height) {
     /* Creating porcupines */
     for(int ii = 0;ii < 4; ii++){
         porpine[ii] = Porcupine(-2 - ii*0.2, grass.max_point, 0.2, 0.3, COLOR_GREEN);
+        porpine[ii].set_validity(0);       // Only valid at level 3
     }
     /**********************/
 
-    /* Initialising Score */
+    /* Initialising Score and level and display*/
     score = Score();
+    level = Level();
+    display = Display();
+    /********************************************/
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
@@ -305,6 +327,11 @@ int main(int argc, char **argv) {
         if(t1.processTick()){
             generate_enemies();
             destroy_enemies();
+            if(game_timer > 0)
+                game_timer--;
+            else if(game_timer == 0){
+                quit(window);
+            }
         }
         // Poll for Keyboard and mouse events
         glfwPollEvents();
@@ -324,7 +351,7 @@ void generate_enemies(){
     Rectangle temp1;
     temp = Ball(-7, random_number, colors[rand() % 4], Radius);
     temp.speed_x = decimal_part;
-    if(count_enemies % 4 == 0){
+    if(count_enemies % 4 == 0 && level.get_level() >= 2){
         float theta = 45 ;
         Point *p = new Point[4];
         temp.attach_slab(p, theta, 2 * Radius, 0.05);

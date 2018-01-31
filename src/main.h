@@ -7,7 +7,9 @@
 #include <vector>
 #include <algorithm>
 #include <iomanip>
+#include <cstring>
 #include <string>
+#include <unistd.h>     // Needed for sleep function calls
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
