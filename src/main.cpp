@@ -2,6 +2,8 @@
 #include "timer.h"
 #include "ellipse.h"
 #include "magnet.h"
+#include "porcupines.h"
+#include "score.h"
 
 using namespace std;
 
@@ -20,6 +22,8 @@ vector<pair <Ball, Rectangle> >::iterator j;
 Rectangle ground, grass, tramp_one, tramp_two;
 Ellipse pond, pond_frame, trampoline;
 Magnet mag1, mag2;
+Porcupine porpine[10];
+Score score;
 int count_enemies = 0;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
@@ -63,6 +67,8 @@ void draw() {
     mag2.draw(VP);
     grass.draw(VP);
     ground.draw(VP);
+    for(int ii = 0;ii < 4; ii++)
+        porpine[ii].draw(VP);
     pond_frame.draw(VP);
     pond.draw(VP);
     for(j = balls.begin(); j < balls.end(); j++){
@@ -77,6 +83,9 @@ void draw() {
 }
 
 void tick_input(GLFWwindow *window) {
+    char test[10101];
+    sprintf(test, "Score: %d", score.get_score());
+    glfwSetWindowTitle(window, test);
     int left  = glfwGetKey(window, GLFW_KEY_A);
     int right = glfwGetKey(window, GLFW_KEY_D);
     int pan_left = glfwGetKey(window, GLFW_KEY_LEFT);
@@ -111,6 +120,7 @@ void tick_input(GLFWwindow *window) {
 void tick_elements() {
     bool jumped_at_theta = 0;
     bool isCollision = 0;
+    int count_collisions = 0;
     Player.tick(pond, grass);
     for(j = balls.begin(); j < balls.end(); j++){
 
@@ -126,14 +136,19 @@ void tick_elements() {
             }
             balls.erase(j);
             isCollision = 1;
-            if(jumped_at_theta)
+            if(jumped_at_theta){
+                score.add(5);
                 break;
+            }
+            count_collisions++;
         }
         /************************************/
 
     }
-    if(isCollision && !jumped_at_theta)
+    if(isCollision && !jumped_at_theta){
         Player.jump();
+        score.add(3*count_collisions);
+    }
     /* To bind the ball inside the screen */
     if(Player.position.x > SCREEN_X_MAX)
         Player.position.x = SCREEN_X_MAX;
@@ -156,20 +171,27 @@ void tick_elements() {
     mag1.detect_in_range(&Player);
     mag2.detect_in_range(&Player);
 
+    /* For ticking the porcupines */
+    for(int ii = 0;ii < 4; ii++){
+        porpine[ii].tick();
+        cout << porpine[ii].detect_collision(Player, &score) << endl;
+    }
+    /*****************************/
+
     /********************** Automatic Panning Section *********************/
-    if(Player.position.x > (screen_center_x + 3.6 / screen_zoom)){
-        screen_center_x += 0.1;
-    }
-    else if(Player.position.x < (screen_center_x - 3.6 / screen_zoom)){
-        screen_center_x -= 0.1;
-    }
-    if(Player.position.y > (screen_center_y + 3.6 / screen_zoom)){
-        screen_center_y += 0.1;
-    }
-    else if(Player.position.y < (screen_center_y - 2.6 / screen_zoom)){
-        screen_center_y -= 0.1;
-    }
-    reset_screen();
+//    if(Player.position.x > (screen_center_x + 3.6 / screen_zoom)){
+//        screen_center_x += 0.1;
+//    }
+//    else if(Player.position.x < (screen_center_x - 3.6 / screen_zoom)){
+//        screen_center_x -= 0.1;
+//    }
+//    if(Player.position.y > (screen_center_y + 3.6 / screen_zoom)){
+//        screen_center_y += 0.1;
+//    }
+//    else if(Player.position.y < (screen_center_y - 2.6 / screen_zoom)){
+//        screen_center_y -= 0.1;
+//    }
+//    reset_screen();
     /********************** Section Ends here *******************************/
 
 
@@ -223,9 +245,18 @@ void initGL(GLFWwindow *window, int width, int height) {
 
     /* Creating magnets */
     // Boiler(x_center, y_center, length, breadth, theta, thickness, color)
-    mag1 = Magnet(-2, 3, 0.8, 0.7, 0, 0.2, COLOR_RED);
-    mag2 = Magnet( 2, 3, 0.8, 0.7, 180, 0.2, COLOR_RED);
+    mag1 = Magnet(-2, 3, 0.8, 0.7, 0, 0.2, COLOR_MAGNET);
+    mag2 = Magnet( 2, 3, 0.8, 0.7, 180, 0.2, COLOR_MAGNET);
     /*****************************************************************/
+
+    /* Creating porcupines */
+    for(int ii = 0;ii < 4; ii++){
+        porpine[ii] = Porcupine(-2 - ii*0.2, grass.max_point, 0.2, 0.3, COLOR_GREEN);
+    }
+    /**********************/
+
+    /* Initialising Score */
+    score = Score();
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
@@ -275,7 +306,6 @@ int main(int argc, char **argv) {
             generate_enemies();
             destroy_enemies();
         }
-
         // Poll for Keyboard and mouse events
         glfwPollEvents();
     }

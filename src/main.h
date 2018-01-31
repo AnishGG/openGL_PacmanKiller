@@ -6,6 +6,8 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <iomanip>
+#include <string>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -88,6 +90,7 @@ extern const color_t COLOR_WHITE;
 extern const color_t COLOR_LIGHT_RED;
 extern const color_t COLOR_PLAYER;
 extern const color_t COLOR_WATER;
+extern const color_t COLOR_MAGNET;
 
 // ----- Points -----
 struct Point {
@@ -98,7 +101,7 @@ struct Point {
 // ------ main.cpp ---------
 void generate_enemies();
 void destroy_enemies();
-static const float BALL_SPEED = 0.08;
+static const float BALL_SPEED = 0.06;
 static const float SCREEN_X_MAX = 3.8 * 4 / 3 + 0.15;
 static const float SCREEN_X_MIN = -3.8 * 4 / 3 - 0.15;
 static const float SCREEN_Y_MAX = 3.8 * 4 / 3 + 0.15;
