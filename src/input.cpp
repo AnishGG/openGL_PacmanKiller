@@ -66,10 +66,13 @@ void mouseButton(GLFWwindow *window, int button, int action, int mods) {
     switch (button) {
     case GLFW_MOUSE_BUTTON_LEFT:
         if (action == GLFW_PRESS) {
-            // Do something
-            return;
+            old_cki = cannon_keyboard_input;
+            drag_pan = true;
+            cannon_keyboard_input = true;
         } else if (action == GLFW_RELEASE) {
-            // Do something
+            cannon_keyboard_input = old_cki;
+            drag_pan = false;
+            drag_oldx = drag_oldy = -1;
         }
         break;
     // case GLFW_MOUSE_BUTTON_RIGHT:

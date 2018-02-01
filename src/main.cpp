@@ -125,6 +125,26 @@ void tick_input(GLFWwindow *window) {
     reset_screen();
     /***********************/
 
+    /* Dragging with the help of mouse */
+    int drag_pan = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
+        if (drag_pan) {
+            if (drag_oldx == -1 || drag_oldy == -1) {
+                glfwGetCursorPos(window, &drag_oldx, &drag_oldy);
+            } else {
+                double newx, newy;
+                glfwGetCursorPos(window, &newx, &newy);
+                int width, height;
+                glfwGetWindowSize(window, &width, &height);
+                Player.position.x += 8 * (newx - drag_oldx) / (width * screen_zoom);
+                Player.rotation += 8 * (newx - drag_oldx) / (width * screen_zoom) * 100;
+                Player.position.y -= 8 * (newy - drag_oldy) / (height * screen_zoom);
+                drag_oldx = newx;
+                drag_oldy = newy;
+                reset_screen();
+            }
+        }
+    /***************************************/
+
     if(level.get_level() > 3){   cout << "You win the game" << endl; quit(window);}
     if(game_timer <= 0){
         cout << "Sorry, You loose" << endl;

@@ -79,6 +79,8 @@ void Ball::tick(Ellipse pool, Rectangle grass) {
         speed_y = 0, speed_x = 0;
         this->position.y = grass.max_point + this->Radius;
     }
+    if(this->position.y - this->Radius > grass.max_point && is_player)  // This condition is only if player drags the ball with the help of the mouse
+        jumped = 1;
 
     /* Setting the pool limits */
     if(this->position.x >= pool.x_min && this->position.x <= pool.x_max && this->position.y <= -1.6){   // 1.6 specifies that their will be no random ball below this point
