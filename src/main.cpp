@@ -222,7 +222,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     // Create the models
 
     /* Initialising the Player */
-    Player       = Ball(2, 2.0, COLOR_PLAYER, 0.2);
+    Player       = Ball(2, 2.0, COLOR_PLAYER, 0.3, 1);
     Player.jumped = 1;
     /***************************/
 
@@ -241,7 +241,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     grass       =     Rectangle(p7, p8, p5, p6, COLOR_GREEN);
     ground      =     Rectangle(p1, p2, p3, p4, COLOR_LIGHT_RED);
     pond        =     Ellipse(0, -2.0, COLOR_WATER, 1.0, 0.7);
-    pond_frame  =     Ellipse(0, -2.0, COLOR_WATER, 1.2, 0.9);
+    pond_frame  =     Ellipse(0, -2.0, COLOR_WATER, 1.0 + Player.Radius, 0.7 + Player.Radius);
 
     /* The making of the Trampoline */
     /* Using p1, p2, p3, p4 again for trampoline co-ordinates for the first support of Trampoline */
@@ -263,8 +263,8 @@ void initGL(GLFWwindow *window, int width, int height) {
 
     /* Creating magnets */
     // Boiler(x_center, y_center, length, breadth, theta, thickness, color)
-    mag1 = Magnet(-2, 3, 0.8, 0.7, 0, 0.2, COLOR_MAGNET);
-    mag2 = Magnet( 2, 3, 0.8, 0.7, 180, 0.2, COLOR_MAGNET);
+    mag1 = Magnet(-3.0, 3, 0.8, 0.7, 0, 0.2, COLOR_MAGNET);
+    mag2 = Magnet( 3.0, 3, 0.8, 0.7, 180, 0.2, COLOR_MAGNET);
     /*****************************************************************/
 
     /* Creating porcupines */
@@ -349,7 +349,7 @@ void generate_enemies(){
     color_t colors[] = {COLOR_BLACK, COLOR_GREEN, COLOR_RED, COLOR_WHITE};
     Ball temp;
     Rectangle temp1;
-    temp = Ball(-7, random_number, colors[rand() % 4], Radius);
+    temp = Ball(-7, random_number, colors[rand() % 4], Radius, 0);
     temp.speed_x = decimal_part;
     if(count_enemies % 4 == 0 && level.get_level() >= 2){
         float theta = 45 ;

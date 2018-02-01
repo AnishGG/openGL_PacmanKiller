@@ -11,7 +11,7 @@ Line::Line(float fx, float fy, float tx, float ty)
         0, 0, 0,
         0.2, 0, 0
     };
-    this->object = create3DObject(GL_LINES, 2, vertex_buffer_data, COLOR_BLACK, GL_FILL);
+    this->object = create3DObject(GL_LINES, 2, vertex_buffer_data, COLOR_RED, GL_FILL);
 }
 
 

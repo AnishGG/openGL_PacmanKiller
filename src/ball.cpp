@@ -2,7 +2,7 @@
 #include "ellipse.h"
 #include "main.h"
 
-Ball::Ball(float x, float y, color_t color, double Radius) {
+Ball::Ball(float x, float y, color_t color, double Radius, bool is_player) {
     this->position = glm::vec3(x, y, 0);
     this->rotation = 0;
     this->Radius   = Radius;
@@ -10,6 +10,7 @@ Ball::Ball(float x, float y, color_t color, double Radius) {
     this->speed_x = 0.01;
     this->jumped = 0;
     this->drowned = 0;
+    this->is_player = is_player;
 
     static GLfloat vertex_buffer_data[10010];
     double theta = 1.0;
@@ -28,7 +29,20 @@ Ball::Ball(float x, float y, color_t color, double Radius) {
         i += 9;
     }
 
-    this->object = create3DObject(GL_TRIANGLES, i/3, vertex_buffer_data, color, GL_FILL);
+    int ll =  (i/9)/7;
+
+    if(is_player){
+        this->part[0] = create3DObject(GL_TRIANGLES, ll*3, vertex_buffer_data, COLOR_VIOLET, GL_FILL);
+        this->part[1] = create3DObject(GL_TRIANGLES, ll*3, vertex_buffer_data + 9*ll, COLOR_INDIGO, GL_FILL);
+        this->part[2] = create3DObject(GL_TRIANGLES, ll*3, vertex_buffer_data + 18*ll, COLOR_BLUE, GL_FILL);
+        this->part[3] = create3DObject(GL_TRIANGLES, ll*3, vertex_buffer_data + 27*ll, COLOR_GREEN, GL_FILL);
+        this->part[4] = create3DObject(GL_TRIANGLES, ll*3, vertex_buffer_data + 36*ll, COLOR_YELLOW, GL_FILL);
+        this->part[5] = create3DObject(GL_TRIANGLES, ll*3, vertex_buffer_data + 45*ll, COLOR_ORANGE, GL_FILL);
+        this->part[6] = create3DObject(GL_TRIANGLES, ll*3+3*3, vertex_buffer_data + 54*ll, COLOR_RED, GL_FILL);
+    }
+    else{
+        this->object = create3DObject(GL_TRIANGLES, i/3, vertex_buffer_data, color, GL_FILL);
+    }
 }
 
 void Ball::draw(glm::mat4 VP) {
@@ -40,7 +54,14 @@ void Ball::draw(glm::mat4 VP) {
     Matrices.model *= (translate * rotate);
     glm::mat4 MVP = VP * Matrices.model;
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
-    draw3DObject(this->object);
+
+    if(is_player){
+    for(int ll = 0;ll < 7; ll++)
+        draw3DObject(this->part[ll]);
+    }
+    else{
+        draw3DObject(this->object);
+    }
 }
 
 void Ball::set_position(float x, float y) {
@@ -49,6 +70,7 @@ void Ball::set_position(float x, float y) {
 
 void Ball::tick(Ellipse pool, Rectangle grass) {
     this->position.x += this->speed_x;
+    this->rotation -= this->speed_x * ROTATION_CONSTANT;
     this->position.y += this->speed_y;
 
     /* Setting the ground limit for the ball */
@@ -82,10 +104,10 @@ void Ball::tick(Ellipse pool, Rectangle grass) {
         // To move the ball to the bottom most point
         // Every time the ball touches the floor, it is given a push towards the least point of the ellipse so that it can go downwards
         if(pool.x0 > this->position.x){
-            this->position.x += 0.01, speed_y -= 0.01;
+            this->position.x += 0.01, speed_y -= 0.01, this->rotation -= 0.01*ROTATION_CONSTANT;
         }
         else if(pool.x0 < this->position.x){
-            this->position.x -= 0.01, speed_y -= 0.01;
+            this->position.x -= 0.01, speed_y -= 0.01, this->rotation += 0.01*ROTATION_CONSTANT;
         }
     }
     this->deaccelerate();
