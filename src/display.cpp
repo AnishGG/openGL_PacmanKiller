@@ -8,7 +8,7 @@ Display::Display(){}
 void Display::store(char *s, float x, float y) {
     len = strlen(s);
     for (int i = 0; i < len; i++) {
-        digs[i] = Digit(s[i], x + 0.3*i, 3.5);
+        digs[i] = Digit(s[i], x + 0.3*i, y);
     }
 }
 

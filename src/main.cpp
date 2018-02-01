@@ -126,8 +126,10 @@ void tick_input(GLFWwindow *window) {
     /***********************/
 
     if(level.get_level() > 3){   cout << "You win the game" << endl; quit(window);}
-    if(game_timer <= 0)
+    if(game_timer <= 0){
+        cout << "Sorry, You loose" << endl;
         quit(window);
+    }
     if(level.get_level_up_score() <= score.get_score()){
         balls.clear();                //destroy_all_enemies()
         level.level_up();
@@ -181,7 +183,7 @@ void tick_elements() {
 
     /* Check if the ball lands on the trampoline */
     if(Player.position.x > trampoline.x_min && Player.position.x < trampoline.x_max){
-        if(Player.position.y - Player.Radius <= trampoline.y0 && Player.speed_y < 0){
+        if(Player.position.y - Player.Radius <= trampoline.position.y && Player.speed_y < 0){
             Player.speed_y = TRAMPOLINE_PUSH;
         }
     }

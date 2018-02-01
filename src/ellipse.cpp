@@ -2,11 +2,10 @@
 #include "main.h"
 
 Ellipse::Ellipse(float x, float y, color_t color, double major, double minor) {
-    this->x0 = x;this->y0 = y;
-    this->position = glm::vec3(x0, y0, 0);
+    this->position = glm::vec3(x, y, 0);
     this->rotation = 0;
-    this->x_min = x0 - major;
-    this->x_max = x0 + major;
+    this->x_min = x - major;
+    this->x_max = x + major;
     this->a = major;
     this->b = minor;
     GLfloat vertex_buffer_data[10010];
@@ -47,5 +46,7 @@ void Ellipse::set_position(float x, float y) {
 
 // Given an x-coordinate on the ellipse, what is the corrosponding y-coordinate on the ellipse
 double Ellipse::calculate_y(float x){
-    return (this->y0 - fabs(sqrt(this->b * this->b * (1 - (double)(((x - this->x0)*(x - this->x0))/(this->a * this->a))))));
+    float y0 = this->position.y;
+    float x0 = this->position.x;
+    return (y0 - fabs(sqrt(this->b * this->b * (1 - (double)(((x - x0)*(x - x0))/(this->a * this->a))))));
 }

@@ -82,7 +82,7 @@ void Ball::tick(Ellipse pool, Rectangle grass) {
 
     /* Setting the pool limits */
     if(this->position.x >= pool.x_min && this->position.x <= pool.x_max && this->position.y <= -1.6){   // 1.6 specifies that their will be no random ball below this point
-        if(this->position.y <= (pool.y0 + this->Radius) + 0.0001/*-1.79999*/){  // 0.0001 so that the ball should enter inside the pool when it lands on it
+        if(this->position.y <= (pool.position.y + this->Radius) + 0.0001/*-1.79999*/){  // 0.0001 so that the ball should enter inside the pool when it lands on it
             jumped = 0;
             drowned = 1;
             speed_y = WATER_AIR_EDGE_SPEED;   // For the ball to slow down once it enters the pond. For now this speed is hardcoded but can be changed afterwards
@@ -103,10 +103,10 @@ void Ball::tick(Ellipse pool, Rectangle grass) {
 
         // To move the ball to the bottom most point
         // Every time the ball touches the floor, it is given a push towards the least point of the ellipse so that it can go downwards
-        if(pool.x0 > this->position.x){
+        if(pool.position.x > this->position.x){
             this->position.x += 0.01, speed_y -= 0.01, this->rotation -= 0.01*ROTATION_CONSTANT;
         }
-        else if(pool.x0 < this->position.x){
+        else if(pool.position.x < this->position.x){
             this->position.x -= 0.01, speed_y -= 0.01, this->rotation += 0.01*ROTATION_CONSTANT;
         }
     }

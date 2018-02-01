@@ -11,21 +11,21 @@ public:
     Ball() {}
     Ball(float x, float y, color_t color, double Radius, bool is_player);
     void attach_slab(Point* points, float theta, float length, float thickness);
-    bool my_collision(Ball b);
-    glm::vec3 position;
-    float rotation;
-    float Radius;
-    bool isSlabAttached, jumped, drowned;
+    float jump_theta(float theta_slab);
     void draw(glm::mat4 VP);
     void set_position(float x, float y);
     void tick(Ellipse pool, Rectangle grass);
     void jump();
-    float jump_theta(float theta_slab);
     void deaccelerate();
+    bool my_collision(Ball b);
+
+    // Variables go here
+    glm::vec3 position;
     double speed_x;
     double speed_y;
-    bool is_player;
-    bounding_box_t bounding_box();
+    float rotation;
+    float Radius;
+    bool isSlabAttached, jumped, drowned, is_player;
 
 private:
     VAO *object;
