@@ -14,7 +14,7 @@ This game needs three major development packages from the mentioned libraries as
 sudo apt install cmake pkg-config libglfw3-dev libglm-dev libglew-dev
 ```
 
-####Run the code
+#### Run the code
 
 ```bash
 cd path/to/project
@@ -37,7 +37,7 @@ make
 - Arrow keys - Panning
 - Player control using mouse drag - Try it!
 
-####Extra Features
+#### Extra Features
 
 ------
 
@@ -47,7 +47,7 @@ make
 - Automatic panning when user tries to go out of the screen
 - Modular codebase
 
-###World
+### World
 
 -----
 
@@ -58,7 +58,7 @@ make
 5. **Porcupines** - Hitting this would lead to reduction in score of 1 and disappearing of this enemy for some time.
 6. **Trampoline** - Jump with more velocity than usual jump.
 
-###Scoring
+### Scoring
 
 ------
 
