@@ -15,7 +15,7 @@ public:
 private:
     int level;
     int level_up_score;
-    char *save[10];
+    const char *save[10];
 };
 
 #endif // LEVEL_H
