@@ -374,7 +374,8 @@ void generate_enemies(){
     temp = Ball(-7, random_number, colors[rand() % 4], Radius, 0);
     temp.speed_x = decimal_part;
     if(count_enemies % 4 == 0 && level.get_level() >= 2){
-        float theta = 45 ;
+        double theta = ((double)rand() / (double)((unsigned)RAND_MAX + 1)) * 90;    // means theta varies between 0 to 90
+        theta += 45;    // means theta varies between 45 to 135
         Point *p = new Point[4];
         temp.attach_slab(p, theta, 2 * Radius, 0.05);
         temp1 = Rectangle(p[0], p[1], p[2], p[3], COLOR_GREEN);
